@@ -2,3 +2,4 @@ pandas
 opencv-python
 ipython
 pytesseract
+python-math
