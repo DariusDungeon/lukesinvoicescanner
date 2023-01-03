@@ -110,6 +110,8 @@ def convert_table_to_dictionary(df):
         line_list = json.loads(row['ocr_text'])
         line_amount = line_list[len(line_list) - 1]
         regex_list = re.findall(r'\d+(?:\.\d{1,2})?', line_amount)
+        if not regex_list:
+            continue
         line_amount_decimal = round(Decimal(regex_list[0]), 2)
 
         # Get description
