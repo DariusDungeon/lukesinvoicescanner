@@ -73,10 +73,10 @@ def convert_table_to_dictionary(df):
     df_line = df_line.sort_values('conf', ascending=False)
 
     if len(df_total.index) < 1:
-        print('Validation failed: There must be at leaste one invoice total.')
+        print('Validation failed: There must be at least one invoice total.')
         return invoice_dict
     elif len(df_line.index) < 1:
-        print('Validation failed: There must be at leaste one invoice line.')
+        print('Validation failed: There must be at least one invoice line.')
         return invoice_dict
 
     # Convert the classes in the data frame from a json string into a readable format
@@ -128,7 +128,7 @@ def convert_table_to_dictionary(df):
         current_total_incl_tax = math.floor(current_total_incl_tax * 100) / 100
         # After the current total was added check if it matches the total amount
         # Keep iterating until the current total exactly matches the total amount
-        # Due to possibly round erros a difference of 0.01 is exceptable
+        # Due to possibly round errors a difference of 0.01 is exceptable
         if (int(total_amount * 100) >= int(current_total_incl_tax * 100)) and (
                 int(total_amount * 100) <= (int(current_total_incl_tax * 100)) + 1):
             invoice_dict['invoice-lines'] = lines_list
