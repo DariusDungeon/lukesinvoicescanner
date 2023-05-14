@@ -151,16 +151,16 @@ def convert_table_to_dictionary(df):
         # After the current total was added check if it matches the total amount
         # Keep iterating until the current total exactly matches the total amount
         # Due to possibly round errors a difference of 0.01 is exceptable
+        diff_incl_tax = abs(int(total_amount * 100) - int(current_total_incl_tax * 100))
+        diff_before_tax = abs(int(total_amount * 100) - int(current_total * 100))
 
-        if ((int(total_amount * 100) >= int(current_total_incl_tax * 100)) and (
-                int(total_amount * 100) <= (int(current_total_incl_tax * 100)) + 1)) or (
-                (int(total_amount * 100) >= int(current_total * 100)) and (
-                int(total_amount * 100) <= (int(current_total * 100)) + 1)):
+        if diff_incl_tax <= 1 or diff_before_tax <= 1:
             invoice_dict['invoice-lines'] = lines_list
             invoice_dict['tax'] = str(tax_rate)
             invoice_dict['total'] = str(total_amount)
             return invoice_dict
-        elif int(total_amount * 100) < int(current_total_incl_tax * 100):
+        elif int((total_amount * 100) < int(current_total_incl_tax * 100)) and (
+                (total_amount * 100) < int(current_total * 100)):
             print('Validation failed: Line item amount does not match total amount. (Amount exceeded)')
             return invoice_dict
     # If this line was reached it means there were not enough invoice lines to approximate the total amount
