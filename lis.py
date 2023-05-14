@@ -103,14 +103,16 @@ def convert_table_to_dictionary(df):
     # Convert the invoice total to a decimal number with 2 digits
     total_json = df_total['ocr_text'].iat[0]
     total_list = json.loads(total_json)
-    total_amount = round(Decimal(total_list[0]), 2)
+    total_amount = total_list[0].replace(',', '.')
+    total_match = re.search(r'\d+(?:\.\d{1,2})?', total_amount)
+    total_amount = round(Decimal(total_match.group()), 2)
 
     # In case a tax rate exits convert it into a decimal number
     tax_rate = 0
     if len(df_tax.index) > 0:
         tax_json = df_tax['ocr_text'].iat[0]
         tax_list = json.loads(tax_json)
-        tax_string = tax_list[0]
+        tax_string = tax_list[0].replace(',', '.')
         # Get tax amount with regex
         pattern = r'\d+(?:\.\d+)?'
         regex_list = re.findall(pattern, tax_string)
@@ -128,7 +130,7 @@ def convert_table_to_dictionary(df):
         single_line_dict = dict()
         # Get line amount
         line_list = json.loads(row['ocr_text'])
-        line_amount = line_list[len(line_list) - 1]
+        line_amount = line_list[len(line_list) - 1].replace(',', '.')
         regex_list = re.findall(r'\d+(?:\.\d{1,2})?', line_amount)
         if not regex_list:
             continue
@@ -139,7 +141,7 @@ def convert_table_to_dictionary(df):
 
         # Create line dictionary
         single_line_dict['Description'] = line_description
-        single_line_dict['Amount'] = line_amount
+        single_line_dict['Amount'] = regex_list[0]
         lines_list.append(single_line_dict)
 
         # Check if all lines have been found yet
@@ -149,8 +151,11 @@ def convert_table_to_dictionary(df):
         # After the current total was added check if it matches the total amount
         # Keep iterating until the current total exactly matches the total amount
         # Due to possibly round errors a difference of 0.01 is exceptable
-        if (int(total_amount * 100) >= int(current_total_incl_tax * 100)) and (
-                int(total_amount * 100) <= (int(current_total_incl_tax * 100)) + 1):
+
+        if ((int(total_amount * 100) >= int(current_total_incl_tax * 100)) and (
+                int(total_amount * 100) <= (int(current_total_incl_tax * 100)) + 1)) or (
+                (int(total_amount * 100) >= int(current_total * 100)) and (
+                int(total_amount * 100) <= (int(current_total * 100)) + 1)):
             invoice_dict['invoice-lines'] = lines_list
             invoice_dict['tax'] = str(tax_rate)
             invoice_dict['total'] = str(total_amount)
