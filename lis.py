@@ -103,7 +103,7 @@ def convert_table_to_dictionary(df):
     # Convert the invoice total to a decimal number with 2 digits
     total_json = df_total['ocr_text'].iat[0]
     total_list = json.loads(total_json)
-    total_amount = total_list[0].replace(',', '.').replace(' ','')
+    total_amount = total_list[0].replace(',', '.').replace(' ','').replace('\u20ac','')
     total_match = re.search(r'\d+(?:\.\d{1,2})?', total_amount)
     total_amount = round(Decimal(total_match.group()), 2)
 
@@ -112,7 +112,7 @@ def convert_table_to_dictionary(df):
     if len(df_tax.index) > 0:
         tax_json = df_tax['ocr_text'].iat[0]
         tax_list = json.loads(tax_json)
-        tax_string = tax_list[0].replace(',', '.').replace(' ','')
+        tax_string = tax_list[0].replace(',', '.').replace(' ','').replace('\u20ac','')
         # Get tax amount with regex
         pattern = r'\d+(?:\.\d+)?'
         regex_list = re.findall(pattern, tax_string)
@@ -130,7 +130,7 @@ def convert_table_to_dictionary(df):
         single_line_dict = dict()
         # Get line amount
         line_list = json.loads(row['ocr_text'])
-        line_amount = line_list[len(line_list) - 1].replace(',', '.').replace(' ','')
+        line_amount = line_list[len(line_list) - 1].replace(',', '.').replace(' ','').replace('\u20ac','')
         regex_list = re.findall(r'\d+(?:\.\d{1,2})?', line_amount)
         if not regex_list:
             continue
@@ -154,7 +154,7 @@ def convert_table_to_dictionary(df):
         diff_incl_tax = abs(int(total_amount * 100) - int(current_total_incl_tax * 100))
         diff_before_tax = abs(int(total_amount * 100) - int(current_total * 100))
 
-        if diff_incl_tax <= 1 or diff_before_tax <= 1:
+        if diff_incl_tax <= 2 or diff_before_tax <= 2:
             invoice_dict['invoice-lines'] = lines_list
             invoice_dict['tax'] = str(tax_rate)
             invoice_dict['total'] = str(total_amount)
